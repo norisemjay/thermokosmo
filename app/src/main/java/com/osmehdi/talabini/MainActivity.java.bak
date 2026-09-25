@@ -1,0 +1,223 @@
+package com.osmehdi.talabini;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.content.Context;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class MainActivity extends Activity {
+
+    private EditText nameInput;
+    private LinearLayout results;
+    private final int BG = Color.rgb(244, 241, 234);
+    private final int CARD = Color.WHITE;
+    private final int TEXT = Color.rgb(45, 40, 36);
+    private final int ACCENT = Color.rgb(109, 76, 65);
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        buildUi();
+    }
+
+    private void buildUi() {
+        ScrollView scroll = new ScrollView(this);
+        scroll.setBackgroundColor(BG);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(18), dp(24), dp(18), dp(30));
+        root.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        TextView title = new TextView(this);
+        title.setText("🔮 طالع‌بینی اوس مهدی");
+        title.setTextSize(28);
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        title.setTextColor(TEXT);
+        title.setGravity(Gravity.CENTER);
+        root.addView(title, lp(-1, -2, 0, 0, 0, 14));
+
+        TextView sub = new TextView(this);
+        sub.setText("اسمتو وارد کن تا ببینیم سرنوشت چی برات نوشته 😄");
+        sub.setTextSize(15);
+        sub.setTextColor(Color.DKGRAY);
+        sub.setGravity(Gravity.CENTER);
+        root.addView(sub, lp(-1, -2, 0, 0, 0, 18));
+
+        nameInput = new EditText(this);
+        nameInput.setHint("نام");
+        nameInput.setTextSize(18);
+        nameInput.setSingleLine(true);
+        nameInput.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        nameInput.setPadding(dp(16), 0, dp(16), 0);
+        nameInput.setBackgroundColor(Color.WHITE);
+        root.addView(nameInput, lp(-1, dp(56), 0, 0, 0, 12));
+
+        Button fortuneButton = new Button(this);
+        fortuneButton.setText("طالع منو بگیر");
+        fortuneButton.setTextSize(17);
+        fortuneButton.setTextColor(Color.WHITE);
+        fortuneButton.setBackgroundColor(ACCENT);
+        root.addView(fortuneButton, lp(-1, dp(56), 0, 0, 0, 20));
+
+        results = new LinearLayout(this);
+        results.setOrientation(LinearLayout.VERTICAL);
+        root.addView(results, lp(-1, -2, 0, 0, 0, 0));
+
+        fortuneButton.setOnClickListener(v -> generate());
+
+        scroll.addView(root);
+        setContentView(scroll);
+    }
+
+    private void generate() {
+        String name = nameInput.getText().toString().trim();
+        if (name.isEmpty()) {
+            nameInput.setError("اول اسمتو وارد کن");
+            return;
+        }
+
+        results.removeAllViews();
+
+        addResult("👤 نام", name);
+        addResult("📝 توصیف", randomFromAsset("description.txt"));
+        addResult("🔮 سرنوشت", randomFromAsset("fate.txt"));
+        addResult("🌤️ بهترین نوع مرگ", randomFromAsset("best_death.txt"));
+        addResult("🌑 بدترین نوع مرگ", randomFromAsset("worst_death.txt"));
+        addResult("💬 نصیحت اوس مهدی", randomFromAsset("advice.txt"));
+        addResult("💰 ثروت نهایی", formatToman(randomWealth()));
+    }
+
+    private String randomFromAsset(String filename) {
+        List<String> options = new ArrayList<>();
+
+        try (InputStream is = getAssets().open(filename);
+             BufferedReader br = new BufferedReader(
+                     new InputStreamReader(is, StandardCharsets.UTF_8))) {
+
+            StringBuilder all = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (all.length() > 0) all.append('\n');
+                all.append(line);
+            }
+
+            String[] parts = all.toString().split(",");
+            for (String part : parts) {
+                String value = part.trim();
+                if (!value.isEmpty()) options.add(value);
+            }
+        } catch (Exception e) {
+            return "برای این بخش هنوز چیزی ننوشتی!";
+        }
+
+        if (options.isEmpty()) return "برای این بخش هنوز چیزی ننوشتی!";
+        return options.get(ThreadLocalRandom.current().nextInt(options.size()));
+    }
+
+    // ثروت با توزیع غیرخطی:
+    // 70٪: صفر تا 1 میلیارد
+    // 20٪: 1 تا 10 میلیارد
+    // 7٪: 10 تا 100 میلیارد
+    // 2٪: 100 میلیارد تا 1 تریلیون
+    // 1٪: 1 تا 100 تریلیون
+    // همه اعداد مضرب 1000 تومان هستند
+    private long randomWealth() {
+        long roll = ThreadLocalRandom.current().nextLong(1000);
+
+        // 3.5٪ دقیقاً صفر تومان
+        if (roll < 35) {
+            return 0L;
+        }
+
+        // 66.5٪ بین 1 هزار تا 1 میلیارد تومان
+        if (roll < 700) {
+            return randomAmount(1_000L, 1_000_000_000L);
+        }
+
+        // 20٪ بین 1 تا 10 میلیارد تومان
+        if (roll < 900) {
+            return randomAmount(1_000_000_000L, 10_000_000_000L);
+        }
+
+        // 7٪ بین 10 تا 100 میلیارد تومان
+        if (roll < 970) {
+            return randomAmount(10_000_000_000L, 100_000_000_000L);
+        }
+
+        // 2٪ بین 100 میلیارد تا 1 تریلیون تومان
+        if (roll < 990) {
+            return randomAmount(100_000_000_000L, 1_000_000_000_000L);
+        }
+
+        // 1٪ بین 1 تا 100 تریلیون تومان
+        return randomAmount(1_000_000_000_000L, 100_000_000_000_000L);
+    }
+
+    private long randomAmount(long min, long max) {
+        final long STEP = 1_000L;
+        long minIndex = min / STEP;
+        long maxIndex = max / STEP;
+
+        return ThreadLocalRandom.current().nextLong(
+                minIndex, maxIndex + 1
+        ) * STEP;
+    }
+
+    private String formatToman(long amount) {
+        String s = String.format(java.util.Locale.US, "%,d", amount);
+        return toPersianDigits(s) + " تومان";
+    }
+
+    private String toPersianDigits(String s) {
+        return s.replace('0','۰').replace('1','۱').replace('2','۲').replace('3','۳')
+                .replace('4','۴').replace('5','۵').replace('6','۶').replace('7','۷')
+                .replace('8','۸').replace('9','۹');
+    }
+
+    private void addResult(String title, String value) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dp(16), dp(14), dp(16), dp(14));
+        card.setBackgroundColor(CARD);
+
+        TextView t = new TextView(this);
+        t.setText(title);
+        t.setTextSize(15);
+        t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        t.setTextColor(ACCENT);
+        t.setGravity(Gravity.RIGHT);
+
+        TextView v = new TextView(this);
+        v.setText(value);
+        v.setTextSize(18);
+        v.setTextColor(TEXT);
+        v.setGravity(Gravity.RIGHT);
+        v.setPadding(0, dp(7), 0, 0);
+
+        card.addView(t);
+        card.addView(v);
+        results.addView(card, lp(-1, -2, 0, 0, 0, 8));
+    }
+
+    private LinearLayout.LayoutParams lp(int w, int h, int l, int t, int r, int b) {
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(w, h);
+        p.setMargins(dp(l), dp(t), dp(r), dp(b));
+        return p;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+}

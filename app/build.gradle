@@ -1,0 +1,23 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.osmehdi.talabini'
+    compileSdk 33
+    buildToolsVersion "34.0.4"
+
+    defaultConfig {
+        applicationId 'com.osmehdi.talabini'
+        minSdk 23
+        targetSdk 33
+        versionCode 1
+        versionName '1.0'
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}

@@ -1,0 +1,33 @@
+pluginManagement {
+    repositories {
+        maven {
+            url = uri("https://maven.aliyun.com/repository/google")
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "com.android.application") {
+                useModule("com.android.tools.build:gradle:8.7.3")
+            }
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven {
+            url = uri("https://maven.aliyun.com/repository/google")
+        }
+        maven {
+            url = uri("https://maven.aliyun.com/repository/public")
+        }
+        mavenCentral()
+    }
+}
+
+rootProject.name = "TalaBini"
+include(":app")

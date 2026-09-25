@@ -1,0 +1,7 @@
+com.osmehdi.talabini.app-pngs-0 /data/data/com.termux/files/home/TalaBini/app/build/generated/res/pngs/debug
+com.osmehdi.talabini.app-resValues-1 /data/data/com.termux/files/home/TalaBini/app/build/generated/res/resValues/debug
+com.osmehdi.talabini.app-packageDebugResources-2 /data/data/com.termux/files/home/TalaBini/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.osmehdi.talabini.app-packageDebugResources-3 /data/data/com.termux/files/home/TalaBini/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.osmehdi.talabini.app-debug-4 /data/data/com.termux/files/home/TalaBini/app/build/intermediates/merged_res/debug/mergeDebugResources
+com.osmehdi.talabini.app-debug-5 /data/data/com.termux/files/home/TalaBini/app/src/debug/res
+com.osmehdi.talabini.app-main-6 /data/data/com.termux/files/home/TalaBini/app/src/main/res
